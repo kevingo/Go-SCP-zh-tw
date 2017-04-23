@@ -3,50 +3,39 @@
 
 在網路應用安全上，如果我們對於使用者的輸入資料不加以驗證，那會是很危險的。我們透過 "輸入資料驗證" 和 "輸入資料清理" 來加以解決這個問題。這些驗證應該在應用程式的每一個環節中進行，同時，驗證的程序必須在可信任的系統上執行(例如：在伺服器端)。
 
-As noted in the [OWASP SCP Quick Reference Guide][1], there are sixteen
-bullet points that cover the issues that the developer should be aware of when
-dealing with Input Validation.
-A lack of consideration for these security risks when developing an application
-is one of the main reasons [Injection][2] ranks as the number 1 vulnerability
-in the "[OWASP Top 10][3]".
+如 [OWASP SCP Quick Reference Guide][1] 所描述，共有 16 個項目是開發者在處理輸入資料驗證時必須要注意的。
+在開發應用程式時，缺乏對於安全性的考量是導致於 [Injection][2] 排名在 "[OWASP Top 10][3]" 中第一名的主要原因。
 
-User interaction is a staple of the current development paradigm in web
-applications. As web applications become increasingly richer in content and
-possibilities, user interaction and submitted user data also increases.
-It is in this context that Input Validation plays a significant role.
+在現今的網路應用中，使用者互動模式已經成為主流，一個網站包含了豐富的內容，同時與使用者互動以及接收使用者輸入的資料已經是家常便飯，因此如何針對使用者輸入進行驗證便扮演了不可或缺的角色。
 
-When applications handle user data, submitted data **must be considered
-insecure by default**, and only accepted after the appropriate security checks
-have been made. Data sources must also be identified as trusted, or untrusted,
-and in case of an untrusted source, validation checks must be made.
+當網站接受到了使用者輸入的資料，開發者應該要*預設*其輸入的資料是不安全的，你只能在經過適當的驗證檢查後，才接受使用者提交上來的資料。
 
-In this section an overview of each technique is provided, along with a sample
-in Go to illustrate the issues.
+在本章節中，我們會提供每一個檢查技巧的概論，並且透過 Go 提供範例來說明每個技巧。
 
-* Validation
-    1. User Interactivity
-        * Whitelisting
-        * Boundary checking
-        * Character escaping
-        * Numeric validation
-    2. File Manipulation
-    3. Data sources
-        * Cross-system consistency checks
-        * Hash totals
-        * Referential integrity
-        * Uniqueness check
-        * Table look up check
+* 驗證
+    1. 使用者互動
+        * 白名單
+        * 邊界檢查
+        * 跳脫字元
+        * 數值驗證
+    2. 檔案操作
+    3. 資料來源
+        * 跨系統一致性檢查
+        * 雜湊總數
+        * 完整性限制
+        * 唯一性限制
+        * 查表檢查
 * Post-validation Actions
     1. Enforcement Actions
         * Advisory Action
         * Verification Action
-* Sanitization
-    1. Check for invalid UTF-8
-        * Convert single less-than characters (<) to entity
-        * Strip all tags
-        * Remove line breaks, tabs and extra white space
-        * Strip octets
-        * URL request path
+* 清理
+    1. 檢查不合法的 UTF-8
+        * 將 < 轉換為實體
+        * 移除所有標籤
+        * 移除換行符號、tabs 和不必要的空白
+        * 移除字節
+        * URL 呼叫路徑
 
 [1]: https://www.owasp.org/images/0/08/OWASP_SCP_Quick_Reference_Guide_v2.pdf
 [2]: https://www.owasp.org/index.php/Top_10_2013-A1-Injection
