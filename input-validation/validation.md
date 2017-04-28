@@ -105,14 +105,11 @@ three separate categories:
 * **建議操作** - 建議操作通常允許沒有變更的資料被輸入，但是來源通常知道輸入的資料存在問題。這適用於非交互的系統中。
 * **驗證操作** - 驗證操作是建議操作的一種特殊案例。在這個例子中，使用者輸入的資料會被建議要如何修改，使用者可以接受這些建議的變更，或是保留原本他自己的輸入。
 
-A simple way to illustrate this is a Billing address form, where the user
-enters his address and the system suggests addresses associated with the
-account. The user then accepts one of these suggestions or ships to the address
-that was initially entered.
+一個簡單的例子是填寫帳單地址的表單，當使用者填寫完畢後，系統會提供該帳戶輸入地址的建議，使用者可以採納建議的地址，或是依照自己原本輸入的地址來送出。
 
 ---
 
-[^1]: Before writing your own regular expression have a look at [OWASP Validation Regex Repository][5]
+[^1]: 在你撰寫自己的正規表示式之前，看看 [OWASP Validation Regex Repository][5]。
 
 [1]: sanitization.md
 [2]: ../file-management/README.md
