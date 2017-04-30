@@ -1,17 +1,9 @@
-Error Handling and Logging
+錯誤處理和日誌
 ==========================
 
-Error handling and logging are an essential part of application and
-infrastructure protection. When Error Handling is mentioned, it is referring to
-the capture of any errors in our application logic that may cause the system to
-crash unless handled correctly. On the other hand, Logging details all the
-operations and requests that occurred on our system. Logging not only allows the
-identification of all operations that have occurred, but it also helps determine
-what actions need to be taken to protect the system. Since attackers sometime
-attempt to remove all traces of their action by deleting logs, it's critical
-that logs are centralized.
+錯誤處理和日誌是應用程式以及資訊安全不可或缺的部分。當提到錯誤處理時，通常指的是捕捉任何我們在撰寫應用程式程式碼的時候所發生的邏輯錯誤。另一方面，日誌會記錄所有系統運作的情形和請求。日誌不僅讓我們了解系統運作的狀況，也幫助我們決定要採取什麼行動來保護我們的系統。攻擊者經常會移除系統中的日誌，因此如何處理日誌變得相當重要。
 
-The scope of this section covers the following:
+本章節包含以下兩大內容：
 
-* Error Handling
-* Logging
+* 錯誤處理
+* 日誌
