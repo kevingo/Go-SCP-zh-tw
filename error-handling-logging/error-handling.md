@@ -1,38 +1,33 @@
-Error Handling
+錯誤處理
 ==============
 
-In Go, there is a built-in `error` type. The different values of `error` type,
-indicate an abnormal state. Usually in Go if the `error` value is not nil
-then an error has occurred, and must be dealt with, in order to allow the
-application to recover from said state without crashing.
+在 Go 中有一個內建的 `error` 型別。不同的 `error` 型別值代表不正常的狀態。當 `error` 的值不是 `nil` 時，通常代表有錯誤產生，我們必須要捕捉錯誤並且處理他，避免系統產生無法預期的錯誤。
 
-A simple example taken from the Go blog follows:
+一個簡單的例子如下：
 
 ```go
 if err != nil {
-    // handle the error
+    // 處理錯誤
 }
 ```
 
-Not only can the built-in errors be used, we can also specify our own error
-types. This can be achieved by using the `errors.New` function.
-Example:
+你不僅可以用內建的錯誤型別，也可以建立自己的錯誤型別。透過 `errors.New` 函式就可以達成。
+
+範例：
 
 ```go
 {...}
 if f < 0 {
     return 0, errors.New("math: square root of negative number")
 }
-//If an error has occured print it
+// 當錯誤產生時，將它印出來
 if err != nil {
     fmt.Println(err)
 }
 {...}
 ```
 
-Just in case we need to format the string containing the invalid argument to see
-what caused the error, the `Errorf` function in the `fmt` package allows us
-to do this.
+一旦我們需要將錯誤的字串進行格式化後再印出時，在 `fmt` 套件中的 `Errorf` 函式可以幫助我們達到這樣的目的。
 
 ```go
 {...}
@@ -42,18 +37,11 @@ if f < 0 {
 {...}
 ```
 
-When dealing with error logs, the developers should ensure no sensitive
-information is disclosed in the error responses, as well as guarantee that no
-error handlers leak information (e.g. debugging, or stack trace information).
+當我們處理錯誤日誌時，開發者必須確保沒有敏感的資訊被揭露在日誌中，同時也要確保沒有錯誤 handler 所產生的資訊(例如：debugging 資訊、stack trace 的資訊等)
 
-In Go there are additional error handling functions, these functions are
-`panic`, `recover` and `defer`. When an application state is `panic` it's
-normal execution is interrupted, any `defer` statements are executed, and
-then the function returns to it's caller. `recover` is usually used inside
-`defer` statements and allow the application to regain control over a
-_panicking_ routine, and return to normal execution.
-The following snippet, based on the Go documentation explains the execution
-flow:
+在 Go 中，還有一些其他錯誤處理的函式，那就是 `panic`、`recover` 和 `defer`。當系統的狀態變為 `panic` 時，正常的流程會被終止，任何 `defer` 的描述句會被執行，同時正在執行的函式會被返回到呼叫他的呼叫者。`recover` 通常會用在 `defer` 敘述中，讓系統重 `panicking` 的 routine 回復到正常執行的狀態。
+
+以下的程式片段描述了大致的流程：
 
 ```go
 func main () {
@@ -83,7 +71,7 @@ func part2 (i int) {
 }
 ```
 
-Output:
+輸出：
 
 ```
 Called start()
@@ -94,43 +82,32 @@ Recovered in start()
 Returned normally from start().
 ```
 
-By examining the output we can see how Go can handle `panic` situations and
-recover from them, allowing the application to resume its normal state. These
-functions allow for a graceful recovery from an otherwise unrecoverable
-failure.
+藉由上面的輸出我們可以了解 Go 是如何處理 `panic` 的狀況，並且從 `panic` 回復到正常狀態。`recover` 函式讓你可以平順的回復到正常的狀態。
 
-It's worth noting that `defer` usages also include _Mutex Unlocking_, or
-loading content after the surrounding function has executed (e.g. footer).
+值得注意的是，`defer` 的功用還包含 `Mutex Unlocking`。或是執行周圍的函式後再讀取等功用。
 
-In the `log` package there is also a `log.Fatal`. Fatal level is effectively
-logging the message, then calling `os.Exit(1)`.
-Which means:
+在 `log` 套件中也有一個 `log.Fatal` 的函式，`Fatal` 等級的記錄也是有用的，接著可以呼叫 `os.Exit(1)`。這代表了：
 
-* Defer statements will not be executed.
-* Buffers will not be flushed.
-* Temporary files and directories are not removed.
+* Defer 描述不會被執行
+* Buffers 不會被清空
+* 暫存檔案或目錄不會被移除 
 
-Considering all the previously mentioned points, we can see how `log.Fatal`
-differs from `Panic` and why it should be used carefully.
-Some examples of the possible usage of `log.Fatal` are:
+考慮到上述幾點，我們可以知道 `log.Fatal` 跟 `panic` 有所不同，因此你必須要小心使用。一些 `log.Fatal` 可能的使用情境有：
 
-* Set up logging and check whether we have a sane environment and parameters.
-  If we don't, then there's no need to execute our main().
-* An error that should never occur and that we know that it's unrecoverable.
-* If a non-interactive process encounters an error and cannot complete, there
-  is no way to notify the user about this error. It's best to stop the
-  execution before additional problems can emerge from this failure.
+* 設定日誌檢查，確認我們確認我們有正確的配置環境變數和參數，如果沒有時，就不需要執行 main 函式。
+* 一個不應該發生的錯誤，同時我們知道這個錯誤是無法被回復到正常狀態的。
+* 如果在一個非互動的過程中發生錯誤，同時這個時間點無法通知使用者，最好的方式就是停止執行，以免發生更多額外的錯誤。
 
-An example of initialization failure to illustrate:
+底下是一個範例：
 
 ```go
 func init(i int) {
     ...
-    //This is just to deliberately crash the function.
+    // 這是一個故意造成錯誤結束的函式
     if i < 2 {
         fmt.Printf("Var %d - initialized\n", i)
     } else {
-        //This was never supposed to happen, so we'll terminate our program.
+        // 這裡不應該被發生，所以我們強制終止程式
         log.Fatal("Init failure - Terminating.")
     }
 }
@@ -144,5 +121,4 @@ func main() {
     fmt.Println("Initialized all variables successfully")
 ```
 
-It's important to assure that in case of an error associated with the security
-controls it's access is denied by default.
+重要的是在確保任何跟安全有關的錯誤發生的情況下，預設必須要拒絕任何存取。
