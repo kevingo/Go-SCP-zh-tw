@@ -1,19 +1,16 @@
-Access Control
+存取控制
 ==============
 
-When dealing with access controls the first step to take is to use only trusted
-system objects for access authorization decisions.
-In the example provided in the [Session Management][3] section we implemented
-this using JWT . JSON Web Tokens to generate a session token on the server-side.
+當談到存取控制時，第一步就是只使用被信任的系統物件來存取授權決定。在 [Session Management][3] 中的例子中，我們使用 JWT。JSON Web token 來產生伺服器端的 token。
 
 ```go
-// create a JWT and put in the clients cookie
+// 建立 JWT token 並放在客戶端的 cookie 中
 func setToken(res http.ResponseWriter, req *http.Request) {
-    //30m Expiration for non-sensitive applications - OWASP
+    // 30m Expiration for non-sensitive applications - OWASP
     expireToken := time.Now().Add(time.Minute * 30).Unix()
     expireCookie := time.Now().Add(time.Minute * 30)
 
-    //token Claims
+    // token Claims
     claims := Claims{
         {...}
     }
@@ -22,32 +19,24 @@ func setToken(res http.ResponseWriter, req *http.Request) {
     signedToken, _ := token.SignedString([]byte("secret"))
 ```
 
-We can then store and use this token to validate the user and enforce our
-`Access Control` model.
+我們可以使用這個 token 來驗證使用者，並且執行控制訪問的模式。
 
-The component used for access authorization should be a single one, used
-site-wide. This includes libraries that call external authorization services.
+用來進行權限控制的元件應該只有單一一個，並且是全站共用。這包含呼叫外部授權服務的函式庫等。
 
-In case of failure, access control should fail securely. In Go we can use
-`Defer` to achieve this.
-More details in the [Error Logging][1] section of the document.
+萬一發生故障時，訪問控制應該安全的失敗，在 Go 中，我們可以使用 `defer` 來實現。
+更多細節可以參考 [Error Logging][1] 中的章節。
 
-If the application cannot to access its configuration information, all
-access to the application should be denied.
+如果一個應用程式無存取他的設定資訊，所有對於該應用程式的請求應該被拒絕。
 
-Authorization controls should be enforced on every request, including
-server-side scripts as well as requests from client-side technologies like AJAX
-or Flash.
+在每個請求上都應該執行存取控制，包含伺服器端的程式和客戶端的 AJAX 請求。
 
-It is also important to properly separate privileged logic from the rest of the
-application code.
+同樣的，將控制權限的程式碼和其他的程式碼區別開來也是很重要的。
 
-Other important operations where access controls must be enforced in order to
-prevent an unauthorized user from accessing them are:
+其他關於防止未經授權的使用者存取你的應用程式有：
 
-* File and other resources.
-* Protected URL's
-* Protected functions
+* 檔案和其他資源。
+* 被保護的 URL。
+* 
 * Direct object references
 * Services
 * Application data
