@@ -35,50 +35,32 @@ func setToken(res http.ResponseWriter, req *http.Request) {
 其他關於防止未經授權的使用者存取你的應用程式有：
 
 * 檔案和其他資源。
-* 被保護的 URL。
-* 
-* Direct object references
-* Services
-* Application data
-* User and data attributes and policy information.
+* 受保護的 URL。
+* 受保護的函式
+* 直接物件參考
+* 服務
+* 應用程式資料
+* 使用者和策略資訊
 
-In the provided sample, a simple direct object reference is tested. This code
-is built upon the [sample in the Session Management][2].
+在提供的範例中，我們會測試一個簡單的物件參考。相關的程式碼會放在 [sample in the Session Management][2] 中。
 
-When implementing these access controls, it's important to verify that the
-server-side implementation and the presentation layer representations of access
-control rules match.
+當實作訪問控制時，要確保伺服器端的控制邏輯與前端的邏輯一致。
 
-If _state data_ needs to be stored on the client-side, it's necessary to use
-encryption and integrity checking in order to prevent tampering.
+當具有狀態的資料必須要存放在客戶端時，針對資料進行加密，並確保資料的一致性而避免被竄改是很重要的。
 
-Application logic flow must comply with the business rules.
+應用程式的邏輯必須和企業的規定符合。
 
-When dealing with transactions, the number of transactions a single user or
-device can perform in a given period of time must be above the business
-requirements but low enough to prevent a user from performing a DoS type
-attack.
+處理交易的需求時，單一使用者或設備在單位時間內可以進行的交易數量必須要高於企業的需求，但也不能高到讓使用者可以進行 DoS 攻擊。
 
-It is important to note that using only the `referer` HTTP header is
-insufficient to validate authorization, and should only be used as a
-supplemental check.
+要注意的是，僅僅使用 `referer` HTTP header 是不足以驗證授權與否的，你應該只使用它作為附加的檢查項目。
 
-Regarding long authenticated sessions, the application should periodically
-re-evaluate the user's authorization to verify that the user's permissions
-have not changed. If the permissions have changed, log the user out and force
-them to re-authenticate.
+對於長時間被授權的 session 來說，應用程式應該要定期檢查該使用者的權限是否被改變，如果被授權的功能已經被改變，應該要取消授權，讓使用者重新被驗證。
 
-User accounts should also have a way to audit them, in order to comply with
-safety procedures. (e.g. Disabling a user's account 30 days after the
-password's expiration date).
+使用者的帳戶也應該要能夠被稽核，為了確保安全性(例如：當使用者的密碼過期超過 30 天後，帳戶應該被取消)。
 
-The application must also support the disabling of accounts and the termination
-of sessions when a user's authorization is revoked. (e.g. Role change,
-employment status, etc.).
+系統也應該要支援當使用者的授權被取消時，要能夠中止使用者的帳號(例如：角色改變、就業狀態改變等)。
 
-When supporting external service accounts and accounts that support connections
-_from_ or _to_ external systems, these accounts must run on the lowest level of
-privilege possible.
+當你的系統支援外部帳號登入，或登入到外部服務時，應該要維持最低的權限。
 
 [1]: /error-handling-logging/error-handling.md
 [2]: URL.go
