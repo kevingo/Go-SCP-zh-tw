@@ -6,11 +6,11 @@
 ```go
 // 建立 JWT token 並放在客戶端的 cookie 中
 func setToken(res http.ResponseWriter, req *http.Request) {
-    // 30m Expiration for non-sensitive applications - OWASP
+    // 非敏感性的資料設定在 30m 過期 - OWASP
     expireToken := time.Now().Add(time.Minute * 30).Unix()
     expireCookie := time.Now().Add(time.Minute * 30)
 
-    // token Claims
+    // 宣告 token
     claims := Claims{
         {...}
     }
