@@ -65,7 +65,7 @@ xxx.xxx.xxx.xxx - - [27/Feb/2017:01:55:09 +0000] "GET /?username=user&password=7
   }
 ```
 
-After a successful login, the user should be informed about the last successful or unsuccessful access date/time so that he can detect and report suspicious activity. Further information regarding logging can be found in the [`Error Handling and Logging`][4] section of the document. Moreover, it is also recommended to use a constant time comparison function while checking passwords in order to prevent timing attack. The latter consists of analyzing the difference of time between multiple requests with different inputs. In this case, a standard comparison of the form `record == password` would return false at the first character that does not match. The closer the submitted password, the longer the response time. By exploiting that, an attacker could guess the password.
+在使用者成功登入後，使用者應該要被告知上一次登入成功或登入失敗的時間，用來提供使用者偵測是否有不正常的登入行為。更多資訊你可以參考在本書中的 [錯誤處理和日誌](4) 章節。此外，在比對密碼時，也建議使用常數時間的字串比較函式來避免計時攻擊。在一般的情況下，使用 `record == password` 這樣的比較方式，會在第一個出現不匹配字元的時候回傳 False，如此一來，越接近正確密碼，回傳的時間就會越長，這會讓攻擊者有機會猜測使用者密碼。
 
 ---
 
