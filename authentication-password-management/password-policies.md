@@ -3,21 +3,18 @@
 
 密碼是屬於歷史的資產，大多數的認證系統中都會使用到，也是攻擊者首要攻擊的目標。
 
-Quite often some service leaks its user's database, and despite the leak of email addresses and other personal data, the biggest concern are passwords. Why? Because passwords are not easy to manage and remember, users not only tend to use weak passwords (e.g. "123456") they can easily remember and can also re-use
-the same password for different services.
+一些服務通常會洩露使用者的資料，儘管 email 或其他的個人資料也會被洩露，最重要的還是密碼。為什麼？因為密碼不容易被記錄和管理，使用者不僅會使用他們容易記住的密碼(例如：123456)，也會在不同的服務中使用相同的密碼。
 
-If your application sign-in requires a password, the best you can do is to "_enforce password complexity requirements, (...) requiring the use of alphabetic as well as numeric and/or special characters)_". Password length should also be enforced: "_eight characters is commonly used, but 16 is better or consider the use of multi-word pass phrases_".
+如果你的系統需要使用密碼登入，最好的做法就是 "_強化密碼的複雜度，強制使用數字和字母的組合，或是增加特殊字元_"，密碼的長度也應該被限定，"_許多系統強制八位數，十六位數更好，或是你也可以考慮使用密碼短語_"。(翻譯註解：passphrases 指用一句較長的句子取代短密碼)
 
-Of course that none of the previous guidelines will prevent users from re-using the same password. The best you can do to tackle down this bad practice is to "_enforce password changes_", preventing password re-use. "_Critical systems may require more frequent changes. The time between resets must be administratively
-controlled_".
+當然，以上的準則都沒辦法阻止使用者重複使用相同的密碼，最好的方式就是讓系統 "_強制讓使用者更換密碼_"，防止密碼被重複使用。關鍵的系統可能需要更頻繁的進行密碼更換的動作。
 
-## Reset
+## 重設密碼
 
-Even if you're not applying any extra password policy, users still need to be able to reset their password. Such a mechanism is as critical as signup or sign-in, and you're encouraged to follow the best practices to be sure your system does not disclose sensitive
-data nor is compromised.
+即使你沒有使用任何的策略來管理密碼，使用者仍然會需要可以重設密碼。這個機制和註冊或登入一樣重要，我們仍然建議你使用最佳實踐來確保系統不會揭露任何帶有敏感性的資訊。
 
-"_Passwords should be at least one day old before they can be changed_". This way you'll prevent attacks on password re-use. Whenever using "_email based resets, only send email to a pre-registered address with a temporary link/password_" which should have a short expiration time.
+"_密碼在可以被變更之前，應該要至少存在一天_"。這可以避免攻擊者頻繁的變更密碼。當透過電子郵件來重設密碼時，只發信給已經註冊的使用者，並且在信中提供暫時的連結或密碼，而過期時間也應該盡可能較短。
 
-Whenever a password reset is requested, the user should be notified. The same way, temporary passwords should be changed on next use.
+每當請求重設密碼時，都應該通使用者，並且在使用者下次登入時要求更換暫時的密碼。
 
-A common practice for password reset is the "Security Question", whose answer was previously configured by the account owner. "_Password reset questions should support sufficiently random answers_": asking for "Favorite Book?" may lead to "The Bible" quite often which makes this reset question a bad one.
+重設密碼一個常見的做法是透過 "回答預先設定的問題答案"。問題的答案由使用者預先輸入，在重設密碼時會詢問使用者該問題的答案。"_這些問題的答案應該要足夠隨機_"，如果問題是："你最喜歡的書"，那答案很有可能是 "聖經"，這樣的問題就會造成安全性的疑慮。
