@@ -30,18 +30,16 @@
 
 如何避免這件事情？
 
-The point is: if two different users provide the same password `p1` we should store a different hashed value. It may sound impossible but the answer is `salt`: a pseudo-random value which is append to `p1` so that the resulting hash is computed as follow: `H(p1 + salt)`.
-
-重點是：如果兩個使用者提供了相同的密碼 `p1`，我們應該要儲存不同的 hash 值。
+重點是：如果兩個使用者提供了相同的密碼 `p1`，我們應該要儲存不同的 hash 值。這聽起來似乎不可能，但其實只要透過 `salt` 的方式：增加一個隨機的值到 `p1` 即可，所以我們產生的 hash 值會是 `H(p1 + salt)`。
 
 So each entry on passwords store should keep the resulting hash and the `salt` itself in plaintext: `salt` does not offer any security concerns.
 
-Last recommendations.
-* Avoid using MD5 hashing algorithm whenever possible;
-* Avoid using SHA1 as it has been cracked recently.
-* Read the [Pseudo-Random Generators section][1].
+最後的建議：
+* 避免使用 MD5 hash 演算法
+* 避免使用 SHA1 演算法，因為他最近被破解了
+* 閱讀 [Pseudo-Random Generators section][1] 章節
 
-The following example shows a basic example of how this works:
+下面提供一個範例：
 
 ```go
 package main
@@ -92,21 +90,21 @@ func main() {
 }
 ```
 
-However, this approach has several flaws and should not be used. It is given here only to illustrate the theory with a practical example. The next section explains how to correctly salt passwords in real life.
+然而，這種方法有幾個缺點，你也不應該使用它。在這裡只是會了給你一個實際的範例，下一章節中我們會探討如何正確的使用 salt。
 
 
-Storing password securely: the practice
+安全的儲存密碼：實際部分
 ---------------------------------------
 
-One of the most important adage in cryptography is: **never write your own crypto**. By not doing so, one can put at risk the entire application. It is a sensitive and complex topic. Hopefully, cryptography provides tools and standards reviewed and approved by experts. It is therefore important to use them instead of trying to re-invent the wheel.
+在密碼學中最重要的一句格言是：**永遠不要自己寫加密程式**。不這樣做的話，你可能會把整個應用程式陷於危險之中。這是一個敏感且複雜的主題，可喜的是，加密技術已經有現成的工具可以使用，同時經過專家的檢驗。因此正確的使用它們而不是自己造輪子才是對的做法。
 
-In the case of password storage, the hashing algorithms recommended by [OWASP][2] are [`bcrypt`][2], [`PDKDF2`][3], [`Argon2`][4] and [`scrypt`][5]. Those take care of hashing and salting passwords in a robust way. Go authors provides an extended package for cryptography, that is not part of the standard library. It provides robust implementations for most of the aforementioned algorithms. It can be downloaded using  `go get`:
+在儲存密碼的前提下，[OWASP][2] 所推薦的 hash 演算法有 [`bcrypt`][2]、[`PDKDF2`][3]、[`Argon2`][4] 和 [`scrypt`][5]。這些套件以強大的方式來處理密碼和 salt。Go 在這方面提供了一個函式庫，它不是標準函式庫的一部份，你可以透過 `go get` 來下載它：
 
 ```
 go get golang.org/x/crypto
 ```
 
-The following example shows how to use bcrypt, which should be good enough for most of the situations. The advantage of bcrypt is that it is simpler to use and is therefore less error-prone.
+下面的範例中會展示如何使用 bcrypt，在大多數的情況下應該都是足夠使用的。bcrypt 的優點是他使用起來很簡單，也因此較不容易出錯：
 
 ```go
 package main
@@ -146,7 +144,7 @@ func main() {
 }
 ```
 
-Bcrypt also provides a simple and secure way to compare a plaintext password with an already hashed password:
+bcrypt 也提供了簡單和安全的方式來比較原始密碼與 hash 過後的密碼：
 
  ```go
  // credentials to validate
@@ -166,7 +164,7 @@ if bcrypt.CompareHashAndPassword(password, []byte(expectedPassword)) != nil {
 }
  ```
 
-[^1]: Hashing functions are the subject of Collisions but recommended hashing functions have a really low collisions probability
+[^1]: Hash 函式會有碰撞的問題，但推薦的 hash 函式發生碰撞的機率都非常低。
 
 [1]: /cryptographic-practices/pseudo-random-generators.md
 [2]: https://www.owasp.org/index.php/Password_Storage_Cheat_Sheet
