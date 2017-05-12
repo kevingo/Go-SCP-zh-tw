@@ -1,37 +1,38 @@
-Validation and Storing authentication data
+驗證與儲存使用者驗證資料
 ==========================================
 
-Validation
+驗證
 ----------
 
-The key subject of this section is the authentication data storage, as more often than desirable, user account databases are leaked on the Internet. Of course that this is not guaranteed to happen, but in the case of such an event, collateral damages can be avoided if authentication data, especially passwords, are stored properly.
+本節中關鍵的主題是如何儲存驗證資料，因為在網路上，使用者帳戶的資料庫是很容易被洩露的。當然這不能保證一定會發生，但如果使用者的密碼有被妥善保存，則傷害可以減到最低。
 
-First, let's make it clear that "_all authentication controls should fail securely_". You're recommended to read all other Authentication and Password Management sections as they cover recommendations about reporting back wrong authentication data and how to handle logging.
+首先，讓我們清楚的說明："_所有的驗證控制應該要安全的失敗_"。建議你可以閱讀其他身份驗證和密碼管理的章節，以了解有關錯誤身份驗證的資料以及如何處理日誌記錄的建議。
 
-One other preliminary recommendation: for sequential authentication implementations (like Google does nowadays), validation should happen only on the completion of all data input, on a trusted system (e.g. the server).
+另外一個建議是：對於循序認證的方式(就像 Google 現在這樣)，驗證的過程只有在受信任的系統輸入完所有資料後才進行。
 
 
-Storing password securely: the theory
+安全的儲存密碼: 理論部分
 -------------------------------------
 
-Now let's talk about storing passwords.
+現在讓我們談談如何安全的儲存密碼。
 
-You don't really need to store passwords as they are provided by the users (plaintext) but you'll need to validate on each authentication whether users are providing the same token.
+事實上你不需要真正的儲存密碼，因為他們會由使用者以明文的方式來提供。但你需要驗證每一次使用者提交的密碼是不是相同。
 
-So, for security reasons, what you need is a "one way" function `H` so that for every password `p1` and `p2`, `p1` is different from `p2`, `H(p1)` is also different from `H(p2)`[^1].
+因此，為了安全的考量，你需要的是一個 "單向" 的函式 `H`，當使用者提交 `p1` 和 `p2` 兩個不同的密碼時，`H(p1)` 和 `H(p2)` 必須要不同。
 
-Does this sound, or look, like Math? Pay attention to this last requirement: `H` should be such a function that there's no function `H⁻¹` so that `H⁻¹(H(p1))` is equal to `p1`. This means
-that there's no way back to the original `p1`.
+這聽起來像是數學嗎？注意最後一個需求：`H` 是一個函式，這個函式必須要讓 `H⁻¹(H(p1))` 不能夠輸出 `p1`，這表示 `H` 是一個單向的函式，沒辦法知道原始的密碼。
 
-If `H` is one-way only, what's the real problem about account leakage?
+如果 `H` 是一個單向的函式，那關於帳號洩漏的真正問題是什麼？
 
-Well, if you know all possible passwords, you can pre-compute their hashes and then run a rainbow table attack.
+如果你知道所有可能的密碼組合，你就可以預先計算出他們的 hash 值，並且進行彩虹表攻擊手法。
 
-Certainly you were already told that passwords are hard to manage from user's point of view, and that users are not only able re-use passwords but they also tend to use something easy to remember, which makes the universe really small.
+現在你知道從使用者的角度而言，密碼是很難被管理的，而他們不僅會使用重複的密碼，也會使用那些容易被記憶的簡單密碼。
 
-How can we avoid this?
+如何避免這件事情？
 
 The point is: if two different users provide the same password `p1` we should store a different hashed value. It may sound impossible but the answer is `salt`: a pseudo-random value which is append to `p1` so that the resulting hash is computed as follow: `H(p1 + salt)`.
+
+重點是：如果兩個使用者提供了相同的密碼 `p1`，我們應該要儲存不同的 hash 值。
 
 So each entry on passwords store should keep the resulting hash and the `salt` itself in plaintext: `salt` does not offer any security concerns.
 
