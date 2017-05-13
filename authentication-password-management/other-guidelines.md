@@ -1,10 +1,10 @@
-Other guidelines
+其他準則
 ================
 
-Authentication is a critical part of any system so you should always employ correct and safe practices. Below are some guidelines to make your authentication system more resilient:
+驗證是任何系統中的關鍵部分，因此你應該始終採取安全且正確的做法。下面是一些讓你的驗證系統更加具有彈性的準則：
 
-* "_Re-authenticate users prior to performing critical operations_"
-* "_Use Multi-Factor Authentication for highly sensitive or high value transactional accounts_"
-* "_Implement monitoring to identify attacks against multiple user accounts, utilizing the same password. This attack pattern is used to bypass standard lockouts, when user IDs can be harvested or guessed_"
-* "_Change all vendor-supplied default passwords and user IDs or disable the associated accounts_"
-* "_Enforce account disabling after an established number of invalid login attempts (e.g., five attempts is common).  The account must be disabled for a period of time sufficient to discourage brute force guessing of credentials, but not so long as to allow for a denial-of-service attack to be performed_"
+* "_在實行關鍵操作前重新驗證使用者_"
+* "_對於高度敏感的使用者，或是具有高價值的交易賬戶採取多重驗證機制_"
+* "_透過利用相同密碼來針對多個使用者帳戶進行攻擊，並且監控系統的行為。這種攻擊模式在於繞過標準鎖定，當使用者的帳號被搜集或被猜測時_"
+* "_變更供應商提供的預設帳號和密碼_"
+* "_在超過無效登入次數的上限後(例如：五次登入失敗後)，停用該帳戶。該帳戶必須要被停用一段時間以避免暴力猜測攻擊。_"
