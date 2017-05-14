@@ -1,10 +1,9 @@
 記憶體管理
 =================
 
-There are several important aspects to consider regarding memory management. Following the OWASP guidelines, the first step we must take to protect our application is the user input/output. Steps must be taken to ensure no malicious content is allowed.
-A more detailed overview of this aspect is in the [Input Validation][1] and the [Output Encoding][2] sections of this document.
+關於記憶體管理有許多重要的面向你需要考量。根據 OWASP 的指導原則，第一步我們必須要保護使用者的輸入和輸出，確保沒有任何惡意的內容。更多細節可以參考[輸入驗證][1] 和 [輸出編碼][2] 等章節。
 
-Another important aspect regarding memory management is the buffer boundary checking. When dealing with functions that accept a number of bytes to copy, usually, in C-style languages, the size of the destination array must be checked to ensure we don't write past the allocated space. In Go, data types such as `String` are not NULL terminated, and in the case of `String` its header consists of the following information:
+另一個關於記憶體管理的重要面向是緩存邊界的檢查。通常以 C 風格的程式語言處理接受多個位元組複製的函式時，必須要檢查目標陣列的大小，以確保我們不會超過分配的空間。在 Go 中，像是 `String` 這種資料型態不會因為 NULL 而中止，同時他的 `header` 會包含以下資訊：
 
 ```go
 type StringHeader struct {
@@ -13,9 +12,9 @@ type StringHeader struct {
 }
 ```
 
-Despite this, boundary checks must be made (e.g. when looping). If we go beyond the set boundaries, Go will `Panic`.
+儘管如此，邊界檢查還是必須要進行(例如：在迴圈中)，如果你超過邊界時，Go 會拋出 `panic`。
 
-A simple example:
+一個範例如下：
 
 ```go
 func main() {
@@ -29,7 +28,7 @@ func main() {
 }
 ```
 
-Output:
+輸出：
 
 ```
 aaa
