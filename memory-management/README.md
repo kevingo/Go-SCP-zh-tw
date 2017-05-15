@@ -38,7 +38,7 @@ ddd
 panic: runtime error: index out of range
 ```
 
-When our application uses resources, additional checks must also be made to ensure they have been closed and not rely solely on the Garbage Collector. This is applicable when dealing with connection objects, file handles, etc. In Go we can use `Defer` to perform these actions. Instructions in `Defer` are only executed when the surrounding functions finish execution.
+當我們的應用程式中有使用到其他資源時，必須要確保程式碼中有正確的關閉該資源，而不僅僅是依賴編譯器的垃圾回收機制。這當你在處理物件連線或檔案處理時都適用。在 Go 中，你可以使用 `defer` 來進行這樣的處理。`defer` 會在函式結束離開前執行他的敘述。
 
 ```go
 defer func() {
@@ -46,17 +46,17 @@ defer func() {
 }
 ```
 
-More information regarding `Defer` can be found in the [Error Handling][3] section of the document.
+更多關於 `defer` 的資訊可以在 [錯誤處理][3] 的章節中閱讀。
 
-Usage of known vulnerable functions should also be avoided. In Go, the `Unsafe` package contains these functions. They should not be used in production environments, nor should the package itself. This also applies to the `Testing` package.
+而一些已知較為不安全的函式也應該避免使用，在 Go 中，`unsafe` 套件中就包含了這些函式。這些函式不應該被用在正式環境中。
 
-On the other hand, memory deallocation is handled by the garbage collector, which means that we don't have to worry about it. An interesting note is that it _is_ possible to manually deallocate memory although it is **not** advised.
+另一方面，記憶體釋放是由垃圾處理器來進行，代表開發者不需要去擔心這一部份。而有趣的事，開發者自己也可以去手動的釋放記憶體資源，儘管這並不建議。
 
-Quoting [Golang's Github](https://github.com/golang/go/issues/13761):
+引用 [Golang's Github](https://github.com/golang/go/issues/13761) 這個 issue：
 
-> If you really want to manually manage memory with Go, implement your own memory allocator based on syscall.Mmap or cgo malloc/free.
+> 如果你真的想要自己手動來管理記憶體資源，你可以根據 syscall.Mmap 或是 cgo malloc/free 來實作。
 >
-> Disabling GC for extended period of time is generally a bad solution for a concurrent language like Go. And Go's GC will only be better down the road.
+> 停用 GC 對於像 Go 這樣的並行語言來說是一個很糟糕的決定，而 Go 的 GC 只會越來越好。
 
 [1]: /input-validation/README.md
 [2]: /output-encoding/README.md
