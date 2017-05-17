@@ -1,12 +1,9 @@
 SQL Injection
 =============
 
-Another common injection due to the lack of proper output encoding is SQL
-Injection, mostly because of an old bad practice: string concatenation.
+Another common injection due to the lack of proper output encoding is SQL Injection, mostly because of an old bad practice: string concatenation.
 
-In short: whenever a variable holding a value which may include arbitrary
-characters such as ones with special meaning to the database management system
-is simply added to a (partial) SQL query, you're vulnerable to SQL Injection.
+In short: whenever a variable holding a value which may include arbitrary characters such as ones with special meaning to the database management system is simply added to a (partial) SQL query, you're vulnerable to SQL Injection.
 
 Imagine you have a query such as the one below:
 
@@ -18,8 +15,7 @@ row, _ := db.Query(query)
 ```
 You’re about to ruin your life.
 
-When provided a valid `customerId` you will list only that customer's credit
-cards, but what if `customerId` becomes `1 OR 1=1`?
+When provided a valid `customerId` you will list only that customer's credit cards, but what if `customerId` becomes `1 OR 1=1`?
 
 Your query will look like:
 
