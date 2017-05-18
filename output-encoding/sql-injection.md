@@ -1,11 +1,11 @@
 SQL Injection
 =============
 
-Another common injection due to the lack of proper output encoding is SQL Injection, mostly because of an old bad practice: string concatenation.
+另外一個因為沒有設定好編碼導致 injection 的問題就是 sql injection，這通常來自於一個不好的習慣：字串串連。
 
-In short: whenever a variable holding a value which may include arbitrary characters such as ones with special meaning to the database management system is simply added to a (partial) SQL query, you're vulnerable to SQL Injection.
+簡言之：任何帶值的變數可能包含任意的字元，當這個變數值待有特殊意義的字元被注入到資料庫系統中時，就有可能發生 SQL injection。
 
-Imagine you have a query such as the one below:
+想像一下你要執行以下的 SQL 語句：
 
 ```go
 customerId := r.URL.Query().Get("id")
@@ -13,19 +13,19 @@ query := "SELECT number, expireDate, cvv FROM creditcards WHERE customerId = " +
 
 row, _ := db.Query(query)
 ```
-You’re about to ruin your life.
+執行的話，你會毀了你的人生。
 
-When provided a valid `customerId` you will list only that customer's credit cards, but what if `customerId` becomes `1 OR 1=1`?
+當你提供的是正確的 `customerId` 時，你會得到正確的顧客信用卡資料，但假設 `customerId` 變成了 `1 OR 1` 這樣的字串呢？
 
-Your query will look like:
+你的 SQL 查詢語句變成：
 
 ```SQL
 SELECT number, expireDate, cvv FROM creditcards WHERE customerId = 1 OR 1=1
 ```
 
-... and you will dump all table records (yes, `1=1` will be true for any record)!
+如此一來，就會把所有資料表的記錄給挑選出來了 (是的，`1=1` 代表任何紀錄都是 True)。
 
-There's only one way to keep your database safe: [Prepared Statements][1].
+只有一種方式來保護你資料庫的安全，那就是使用 [Prepared Statements][1]。
 
 ```go
 customerId := r.URL.Query().Get("id")
@@ -33,15 +33,15 @@ query := "SELECT number, expireDate, cvv FROM creditcards WHERE customerId = ?"
 
 stmt, _ := db.Query(query, customerId)
 ```
-Notice the placeholder[^1] `?` and how your query is:
+注意 [^1] `?` 這個符號，如此一來你的查詢會變得：
 
- * readable,
- * shorter and
- * SAFE
+ * 可讀
+ * 簡短，且
+ * 安全
 
-Check Database Security section in this guide to get more in-depth information about this topic.
+你可以閱讀資料庫安全的章節來得到更詳細的資訊。
 
 ---
-[^1] The placeholder syntax in prepared statements is database-specific.
+[^1] 這個語法是給資料庫使用的語法
 
 [1]: https://golang.org/pkg/database/sql/#DB.Prepare
