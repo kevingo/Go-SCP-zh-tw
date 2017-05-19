@@ -1,12 +1,9 @@
 XSS - Cross Site Scripting
 ==========================
 
-Most developers have heard about it, yet most never tried to exploit a Web
-Application using XSS.
+Most developers have heard about it, yet most never tried to exploit a Web Application using XSS.
 
-Cross Site Scripting is on [OWASP Top 10][0] since 2003 and it still is a common
-vulnerability. The [2013 version][1] is pretty detailed about XSS:
-attack vectors, security weakness, technical impacts and business impacts.
+Cross Site Scripting is on [OWASP Top 10][0] since 2003 and it still is a common vulnerability. The [2013 version][1] is pretty detailed about XSS: attack vectors, security weakness, technical impacts and business impacts.
 
 In short
 
@@ -14,11 +11,7 @@ In short
 > properly escaped, or you do not verify it to be safe via server-side input
 > validation, before including that input in the output page. ([source][1])
 
-Go, just like any other multi-purpose programming language has everything needed
-to mess with and make you vulnerable to XSS, despite the documentation being
-clear about using the [html/template package][2]. Quite easily you can find
-"hello world" examples using [net/http][3] and [io][4] packages and without
-realizing it, you're vulnerable to XSS.
+Go, just like any other multi-purpose programming language has everything needed to mess with and make you vulnerable to XSS, despite the documentation being clear about using the [html/template package][2]. Quite easily you can find "hello world" examples using [net/http][3] and [io][4] packages and without realizing it, you're vulnerable to XSS.
 
 Imagine the following code:
 
@@ -38,36 +31,25 @@ func main () {
 }
 ```
 
-This snippet creates and starts an HTTP Server listening on port `8080`
-(`main()`), handling requests on server's root (`/`).
+This snippet creates and starts an HTTP Server listening on port `8080` (`main()`), handling requests on server's root (`/`).
 
-The `handler()` function, which handles requests, expects a Query String
-parameter `param1`, whose value is then written to the response stream (`w`).
+The `handler()` function, which handles requests, expects a Query String parameter `param1`, whose value is then written to the response stream (`w`).
 
-As `Content-Type` HTTP response header is not explicitly defined, Go
-`http.DetectContentType` default value will be used, which follows the
-[WhatWG spec][5].
+As `Content-Type` HTTP response header is not explicitly defined, Go `http.DetectContentType` default value will be used, which follows the [WhatWG spec][5].
 
-So, making `param1` equal to "test", will result in `Content-Type` HTTP
-response header to be sent as `text/plain`
+So, making `param1` equal to "test", will result in `Content-Type` HTTP response header to be sent as `text/plain`
 
 ![Content-Type: text/plain][content-type-text-plain]
 
-but if `param1` first characters are "&lt;h1&gt;", `Content-Type` will
-be `text/html`.
+but if `param1` first characters are "&lt;h1&gt;", `Content-Type` will be `text/html`.
 
 ![Content-Type: text/html][content-type-text-html]
 
-You may think that making `param1` equal to any HTML tag will lead to the same
-behavior, but it won't: making `param1` equal to "&lt;h2&gt;", "&lt;span&gt;"
-or "&lt;form&gt;" will make `Content-Type` to be sent as `plain/text` instead
-of expected `text/html`.
+You may think that making `param1` equal to any HTML tag will lead to the same behavior, but it won't: making `param1` equal to "&lt;h2&gt;", "&lt;span&gt;" or "&lt;form&gt;" will make `Content-Type` to be sent as `plain/text` instead of expected `text/html`.
 
 Now let's make `param1` equal to `<script>alert(1)</script>`.
 
-As per [WhatWG spec][5] `Content-Type` HTTP response header will be sent as
-`text/html`, `param1` value will be rendered and... here it is, the
-XSS - Cross Site Scripting.
+As per [WhatWG spec][5] `Content-Type` HTTP response header will be sent as `text/html`, `param1` value will be rendered and... here it is, the XSS - Cross Site Scripting.
 
 ![XSS - Cross-Site Scripting][cross-site-scripting]
 
@@ -77,13 +59,9 @@ After talking with Google regarding this situation, they informed us that:
 > the content-type set automatically. We expect that programmers will use
 > html/template for proper escaping.
 
-Google states that developers are responsible for sanitizing and protecting
-their code. We totally agree BUT in a language where security is a priority,
-allowing `Content-Type` to be set automatically besides having `text/plain` as
-default, is not the best way to go.
+Google states that developers are responsible for sanitizing and protecting their code. We totally agree BUT in a language where security is a priority, allowing `Content-Type` to be set automatically besides having `text/plain` as default, is not the best way to go.
 
-Let's make it clear: `text/plain` and/or the [text/template package][6] won't
-keep you away from XSS as it does not sanitize user input.
+Let's make it clear: `text/plain` and/or the [text/template package][6] won't keep you away from XSS as it does not sanitize user input.
 
 ```go
 package main
@@ -105,13 +83,11 @@ func main() {
 }
 ```
 
-Making `param1` equal to "&lt;h1&gt;" will lead to `Content-Type` being sent as
-`text/html` what makes you vulnerable to XSS.
+Making `param1` equal to "&lt;h1&gt;" will lead to `Content-Type` being sent as `text/html` what makes you vulnerable to XSS.
 
 ![XSS while using text/template package][text-template-xss]
 
-Replace the [text/template package][6] by the [html/template][2] one and you'll
-be ready to proceed... safely.
+Replace the [text/template package][6] by the [html/template][2] one and you'll be ready to proceed... safely.
 
 ```go
 package main
@@ -133,8 +109,7 @@ func main() {
 }
 ```
 
-Not only `Content-Type` HTTP response header will be sent as `text/plain` when
-`param1` is equal to "&lt;h1&gt;"
+Not only `Content-Type` HTTP response header will be sent as `text/plain` when `param1` is equal to "&lt;h1&gt;"
 
 ![Content-Type: text/plain while using html/template package][html-template-plain-text]
 
