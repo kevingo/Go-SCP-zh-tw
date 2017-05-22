@@ -1,19 +1,17 @@
-XSS - Cross Site Scripting
+XSS - 跨站腳本攻擊
 ==========================
 
-Most developers have heard about it, yet most never tried to exploit a Web Application using XSS.
+大多數的開發者應該都聽過 XSS 攻擊，但很少人會實際嘗試他。
 
-Cross Site Scripting is on [OWASP Top 10][0] since 2003 and it still is a common vulnerability. The [2013 version][1] is pretty detailed about XSS: attack vectors, security weakness, technical impacts and business impacts.
+跨站腳本攻擊從 2003 年開始是名列 [OWASP Top 10][0] 的資安問題，直到現在還是相當常見的風險之一。在 [2013 version][1] 中詳細的描述了這個資安問題，包括了：攻擊的對象、安全弱點、技術影響和企業業務影響等。
 
-In short
+簡單來說：
 
-> You are vulnerable if you do not ensure that all user supplied input is
-> properly escaped, or you do not verify it to be safe via server-side input
-> validation, before including that input in the output page. ([source][1])
+> 如果你沒辦法確保使用者的輸入有正確的被處理，或是在伺服器端驗證之前就把使用者的輸入顯示在輸出的頁面，你將會處於風險中。([source][1])
 
-Go, just like any other multi-purpose programming language has everything needed to mess with and make you vulnerable to XSS, despite the documentation being clear about using the [html/template package][2]. Quite easily you can find "hello world" examples using [net/http][3] and [io][4] packages and without realizing it, you're vulnerable to XSS.
+Go 語言，就像其他許多語言一樣，儘管它提供了清楚的 [html/template 套件][2] 說明文件，你還是很容易因為不注意而暴露在 XSS 攻擊的風險中。
 
-Imagine the following code:
+想像一下下面的程式碼：
 
 ```go
 package main
@@ -31,37 +29,35 @@ func main () {
 }
 ```
 
-This snippet creates and starts an HTTP Server listening on port `8080` (`main()`), handling requests on server's root (`/`).
+這一段程式碼建立並啟動一個 HTTP 伺服器，監聽 `8080` port，並且接收 `/` 的請求。
 
-The `handler()` function, which handles requests, expects a Query String parameter `param1`, whose value is then written to the response stream (`w`).
+`handler()` 函式是用來處理使用者的請求，在這個範例的程式碼中，會預期使用者帶一個 `param1` 的參數，這個參數會寫到回應的 stream (`w`)。
 
-As `Content-Type` HTTP response header is not explicitly defined, Go `http.DetectContentType` default value will be used, which follows the [WhatWG spec][5].
+由於在這裡沒有明確指定 HTTP 回應的 `Content-Type`，Go 會使用 `http.DetectContentType` 當成預設值，這個預設值會遵守 [WhatWG spec][5] 標準。
 
-So, making `param1` equal to "test", will result in `Content-Type` HTTP response header to be sent as `text/plain`
+所以，將 `param1` 設為 "test" 會讓 `Content-Type` 自動判定為 `text/plain`。
 
 ![Content-Type: text/plain][content-type-text-plain]
 
-but if `param1` first characters are "&lt;h1&gt;", `Content-Type` will be `text/html`.
+但如果將 `param1` 設定為 "&lt;h1&gt;"，`Content-Type` 就會變成 `text/html`.
 
 ![Content-Type: text/html][content-type-text-html]
 
-You may think that making `param1` equal to any HTML tag will lead to the same behavior, but it won't: making `param1` equal to "&lt;h2&gt;", "&lt;span&gt;" or "&lt;form&gt;" will make `Content-Type` to be sent as `plain/text` instead of expected `text/html`.
+你可能會想，如果將 `param1` 設定為任意的 HTML 標籤都會是一樣的行為。但其實不是，如果你將 `param1` 設定為 "&lt;h2&gt;", "&lt;span&gt;" or "&lt;form&gt;"，`Content-Type` 將會是 `plain/text`，而不是 `text/html`。
 
-Now let's make `param1` equal to `<script>alert(1)</script>`.
+現在，我們讓 `param1` 設定為 `<script>alert(1)</script>`。
 
-As per [WhatWG spec][5] `Content-Type` HTTP response header will be sent as `text/html`, `param1` value will be rendered and... here it is, the XSS - Cross Site Scripting.
+根據 [WhatWG spec][5] 標準，`Content-Type` 會被標示為 `text/html`，`param1` 的值將會被顯示出來，這樣，的確就是 XSS - 跨站腳本攻擊。
 
 ![XSS - Cross-Site Scripting][cross-site-scripting]
 
-After talking with Google regarding this situation, they informed us that:
+在跟 Google 討論這個問題後，他們告知：
 
-> It's actually very convenient and intended to be able to print html and have
-> the content-type set automatically. We expect that programmers will use
-> html/template for proper escaping.
+> 這實際上非常方便，目的在於讓應用程式能夠顯示 HTML，並且自動設定內容的型態。我們期望開發者能夠使用 html/template 來進行正確的轉換。
 
-Google states that developers are responsible for sanitizing and protecting their code. We totally agree BUT in a language where security is a priority, allowing `Content-Type` to be set automatically besides having `text/plain` as default, is not the best way to go.
+Google 表示他們讓開發者自己對自己的程式碼善盡保護的責任，我們完全同意，但讓語言本身允許 `Content-Type` 自動設置除了 `text/plain` 以外的預設值不是最好的做法。
 
-Let's make it clear: `text/plain` and/or the [text/template package][6] won't keep you away from XSS as it does not sanitize user input.
+讓我們說得更清楚一點：`text/plain` 或是 [text/template package][6] 不會讓你遠離 XSS 攻擊，因為他們不會處理使用者的輸入。
 
 ```go
 package main
@@ -83,11 +79,11 @@ func main() {
 }
 ```
 
-Making `param1` equal to "&lt;h1&gt;" will lead to `Content-Type` being sent as `text/html` what makes you vulnerable to XSS.
+當 `param1` 為 "&lt;h1&gt;" 時，會讓 `Content-Type` 被自動判斷為 `text/html`，這讓你暴露在 XSS 攻擊的風險中。
 
 ![XSS while using text/template package][text-template-xss]
 
-Replace the [text/template package][6] by the [html/template][2] one and you'll be ready to proceed... safely.
+將 [text/template package][6] 改為 [html/template][2]，你會發現比較安全。
 
 ```go
 package main
@@ -109,11 +105,11 @@ func main() {
 }
 ```
 
-Not only `Content-Type` HTTP response header will be sent as `text/plain` when `param1` is equal to "&lt;h1&gt;"
+不僅僅因為當使用者的 `param1` 輸入是 "&lt;h1&gt;" 時，`Content-Type` 會被判定為 `text/plain`，
 
 ![Content-Type: text/plain while using html/template package][html-template-plain-text]
 
-but also `param1` is properly encoded to the output media: the browser.
+而且 `param1` 會被正確的編碼並輸出到瀏覽器上。
 
 ![No XSS while using html/template package][html-template-noxss]
 
