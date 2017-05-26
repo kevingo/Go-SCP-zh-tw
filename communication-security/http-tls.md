@@ -3,14 +3,15 @@ HTTP/TLS
 
 `TLS/SSL` is a cryptographic protocol that allows encryption over otherwise unsecure communication channels. The most common usage of it is to provide secure `HTTP` communication, also known as `HTTPS`. The protocol ensures that the following properties apply to the communication channel:
 
-* Privacy
-* Authentication
-* Data integrity
+`TLS/SSL` 是一個加密的協議，讓雙方的通訊已被加密的狀態進行。最常見的使用情境是使用在 `HTTP` 協議上，也就是 `HTTPS`。`HTTPS` 協議確保以下三項：
 
-Its implementation in Go is in the `crypto/tls` package. In this section we will focus on the Go implementation and usage. Although the theoretical part of the protocol design and it's cryptographic
-practices are beyond the scope of this article, additional information is available on the [Cryptography Practices][1] section of this document.
+* 隱私
+* 認證
+* 資料一致性
 
-The following is a simple example of an HTTP with TLS:
+在 Go 語言中，對應的實作會在 `crypto/tls` 套件，在本章節中，我們將重點性的介紹 Go 的實作和使用方法。雖然協議本身設計的理論和加密的實作超過了本文的範圍，你還是可以在 [Cryptography Practices][1] 章節中找到相關的資訊。
+
+下面是一個在 `HTTP` 使用 `TLS` 的範例：
 
 ```go
 import "log"
@@ -27,17 +28,17 @@ func main() {
 }
 ```
 
-This is a simple out-of-the-box implementation of SSL in a webserver using Go. It's worth noting that this example gets an "A" on SSL Labs.
+這是一個在伺服器端使用 SSL 的範例，值得注意的是，這個案例在 SSL Labs 中得到了 "A" 的評價。
 
-To further improve the communication security, the following flag could be added to the header, in order to enforce HSTS (HTTP Strict Transport Security):
+為了進一步提高安全性，你可以在 header 中加入以下欄位，強制執行 HSTS (HTTP Strict Transport Security)。
 
 ```go
 w.Header().Add("Strict-Transport-Security", "max-age=63072000; includeSubDomains")
 ```
 
-Go's TLS implementation is in the `crypto/tls` package. When using TLS, make sure that a single standard TLS implementation is used and that it's appropriately configured.
+Go 的 TLS 實作是在 `crypto/tls` 套件中，當使用 TLS 時，請確保使用單一標準的 TLS 有被正確的設定。
 
-Implementing SNI (Server Name Indication) based on the previous example:
+根據前面的範例，我們再來實作 SNI(Server Name Indication)：
 
 ```go
 ...
@@ -72,25 +73,23 @@ func main() {
 }
 ```
 
-It should be noted that when using TLS, the certificates should be valid, have the correct domain name, should not be expired, and should be installed with intermediate certificates when required, as recommended in the [OWASP SCP Quick Reference Guide][2].
+注意，當你使用 TLS 時，證書必須要是合法的，包含了正確的域名，同時不能過期，當必要時，要安裝中間憑證。更多資訊可以參考 [OWASP SCP Quick Reference Guide][2] 中的描述。
 
-**Important:** Invalid TLS certificates should always be rejected.
-Make sure that the `InsecureSkipVerify` configuration is not set
-to `true` in a production environment. The following snippet is an example of how to set this:
+**重要:** 不合法的 TLS 憑證應該要被拒絕，確保 `InsecureSkipVerify` 設定在正式環境上沒有被設定為 `true`。如下面的程式碼片段：
 
 ```go
 config := &tls.Config{InsecureSkipVerify: false}
 ```
 
-Use the correct hostname in order to set the server name:
+設定正確的域名：
 
 ```go
 config := &tls.Config{ServerName: "yourHostname"}
 ```
 
-Another known attack against TLS to be aware of is called POODLE. It is related to TLS connection fallback when the client does not support the server's cypher. This allows the connection to be downgraded to a vulnerable cypher.
+另外一個關於 TLS 的攻擊是 POODLE。這個攻擊主要是由於客戶端不支援伺服器端的加密方式，因而伺服器端會配合客戶端降低加密方法。這樣會造成連線容易被攻擊。
 
-By default, Go disables SSLv3 and the cypher's minimum version and maximum version can be set with the following configurations:
+默認情況下，Go 會禁止 SSLv3，並透過以下方法可以設定加密的最小及最大版本：
 
 ```go
 // MinVersion contains the minimum SSL/TLS version that is acceptable.
@@ -105,29 +104,28 @@ By default, Go disables SSLv3 and the cypher's minimum version and maximum versi
 MaxVersion uint16
 ```
 
-The safety of the used cyphers can be checked with [SSL Labs][4].
+你可以使用 [SSL Labs][4] 來檢查密碼的安全性。
 
-An additional flag that is commonly used to mitigate downgrade attacks is the `TLS_FALLBACK_SCSV` as defined in [RFC7507][3]. In Go, there is no fallback.
+另一個用來防止這種攻擊的方式是在 [RFC7507][3] 中定義的 TLS_FALLBACK_SCSV。在 Go 中，不支援降級的機制。
 
-Quote from Google developer Adam Langley:
+根據 Google 的開發者 Adam Langley 表示：
 
-> The Go client doesn't do fallback so doesn't need to send TLS_FALLBACK_SCSV.
+> Go 的客戶端不會降級連線，所以不需要傳送 TLS_FALLBACK_SCSV。
 
-Another attack known as CRIME affects TLS sessions that use compression. Compression is part of the core protocol, but it's optional. Programs written in the Go programming language are likely not vulnerable, simply because there is currently no compression mechanism supported by `crypto/tls`. An important
-note to keep in mind is if a Go wrapper is used for an external security library, the application may be vulnerable.
+另一個攻擊稱為 CRIME，是透過壓縮來達到攻擊的目的。壓縮是核心協定的功能之一，但他是可選、非必需的。使用 Go 所寫的程式可能不會受到影響，因為目前 `crytpo/tls` 套件並沒有支援壓縮的機制。要特別注意的是，如果你使用了外部有關於資訊安全方面的套件，那有可能是不安全的。
 
-Another part of TLS is related to the connection renegotiation. To guarantee no insecure connections are established, use the `GetClientCertificate` and it's associated error code in case the handshake is aborted. The error code can be captured to prevent an insecure channel from being used.
+另外一個 TLS 的部分是關於連線的重新協議。為了確保沒有不安全的連線會被建立，請使用 `GetClientCertificate` 及其相關連的處理錯誤的程式碼，以防止 handshake 失敗。透過他，可以捕捉錯誤程式碼，並且防止使用不安全的通道。
 
-All requests should also be encoded to a pre-determined character encoding such as UTF-8. This can be set in the header:
+所有的請求也應該預先編碼，例如使用 UTF-8，你可以在 header 中設定：
 
 ```go
 w.Header().Set("Content-Type", "Desired Content Type; charset=utf-8")
 ```
 
-Another important aspect when handling HTTP connections is to verify that the HTTP header does not contain any sensitive information when accessing external sites. Since the connection could be insecure, the HTTP header may leak information.
+另外一個部分是，在處理 HTTP 連線到外部網站時，header 沒有包含任何敏感的資訊。當連線沒有加密時，HTTP header 裡面的資訊很有可能會被洩露。
 
 ![HTTP Header Leak](img/InsecureHeader.png)
-Image Credits : [John Mitchell][5]
+圖片來源 : [John Mitchell][5]
 
 [1]: ../cryptography-practices/README.md
 [2]: https://www.owasp.org/images/0/08/OWASP_SCP_Quick_Reference_Guide_v2.pdf
