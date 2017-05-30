@@ -1,27 +1,26 @@
 WEBSOCKETS
 ==========
 
-WebSocket is a new browser capability developed for HTML 5 which enables fully interactive applications. With WebSockets, both the browser and the server can send asynchronous messages over a single TCP socket, without resorting to _long polling_ or _comet_.
+WebSocket 是一個為了 HTML5 所定義的全雙工的通訊模式。透過 WebSocket，，瀏覽器和伺服器淑芳都可以在一個 TCP 通道中傳送非同步的訊息，而不需要使用 _long polling_ 或 _comet_ 的方式。
 
-Essentially, a WebSocket is a standard bidirectional TCP socket between the client and the server. The socket starts out as a regular HTTP connection and then "Upgrades" to a TCP socket after a HTTP handshake. Either side can send data after the handshake.
+本質上，Websocket 是一個在伺服器和客戶端之間標準的 TCP socket 連線，這個 socket 會先透過一個標準的 HTTP 進行請求，之後再 "Upgrade" 到一個 TCP socket。在順利 handshake 之後，雙方便可以開始傳輸資料。
 
-## Origin Header
+## 原始的 Header
 
-The `Origin` header in the HTTP Websocket handshake, is used to guarantee that the connection accepted by the Websocket is from a trusted origin domain. Failure to enforce can lead to Cross Site Request Forgery (CSRF).
+在 HTTP header 中的 `Origin` 用來確保 Websocket 接受的連線是來自於可信任的域名，否則可能會產生 Cross Site Request Forgery (CSRF) 問題。
 
-It is the server’s responsibility to verify the `Origin` header in the initial HTTP WebSocket handshake. If the server does not validate the origin header in the initial WebSocket handshake, the WebSocket server may accept connections from any origin.
+在 HTTP Websocket 初始化時確保 `Origin` 是正確的是伺服器端的責任，如果伺服器沒有驗證 header，那該 websocket 連線很有可能被其他不合法的源站(origin)攻擊。
 
-The following example uses an `Origin` header check, which prevents
-attackers from performing CSWSH (Cross-Site WebSocket Hijacking).
+下面的範例中提供一個範例，作為檢查 `Origin` 之用，避免 CSWSH (Cross-Site WebSocket Hijacking) 攻擊：
 
 ![HTTP Header Leak](img/w1_1.png)
 
-The application should validate the `Host` and the `Origin` to make sure the request's `Origin` is the trusted `Host`, rejecting the connection otherwise.
+應用程式應該要檢查 `Host` 和 `Origin`，確保請求的來源是來自於合法的 `Host`，其他的連線則應該拒絕。
 
-A simple check is demonstrated in the following snippet:
+一個簡單的範例如下：
 
 ```go
-//Compare our origin with Host and act accordingly
+// 檢查來源的 Origin
 if r.Header.Get("Origin") != "http://"+r.Host {
   http.Error(w, "Origin not allowed", 403)
     return
@@ -30,33 +29,33 @@ if r.Header.Get("Origin") != "http://"+r.Host {
 }
 ```
 
-## Confidentiality and Integrity
+## 保密與資料一致性
 
-The Websocket communication channel can be established over unencrypted TCP or over encrypted TLS.
+Websocket 的通道可以是未加密的 TCP 或是加密的 TLS。
 
-When unencrypted Websockets are used, the URI scheme is `ws://` and its default port is `80`. If using TLS Websockets, the URI scheme is `wss://` and the default port is `443`.
+當使用未加密的 websocket 時，URI 的標示符號是 `ws://`，預設的連接阜是 `80`。如果使用加密的 websocket，URI 標示符是 `wss://`，預設的連接阜是 `443`。
 
-When referring to Websockets, we must consider the original connection and whether it uses TLS or if it is being sent unencrypted.
+當使用 websocket 時，我們必須要考慮使用加密或未加密的連線。
 
-In this section we will show the information being sent when the connection upgrades from HTTP to Websocket and the risks it poses if not handled correctly. In the first example, we see a regular HTTP connection being upgraded to a Websocket connection:
+在本章節中我們會展示當一個連線從 HTTP 升級為 websocket 連線：
 
 ![HTTP Cookie Leak](img/w2_1.png)
 
-Notice that the header contains our cookie for the session. To ensure no sensitive information is leaked, TLS should be used when upgrading our connection. As the following image shows:
+注意該連線的 header 中包含了 cookie 資訊，因此我們應該使用加密的 TLS 連線：
 
 ![HTTP Cookie TLS](img/ws_tls_upgrade.png)
 
-In the latter example, our connection upgrade request is using SSL, as well as our Websocket:
+在第二個範例中，我們使用的 websocket 連線是使用 SSL 加密：
 
 ![Websocket SSL](img/wss_secure.png)
 
-## Authentication and Authorization
+## 認證與授權
 
-Websockets do not handle Authentication or Authorization, which means that mechanisms such as cookies, HTTP authentication or TLS authentication must be used to ensure security. More detailed information regarding this can be found in the [Authentication][1] and the [Access Control][2] parts of this document.
+Websocket 不處理認證或授權，這意味著我們必須使用 cookie、HTTP 認證或 TLS 認證等方式來確保安全。更多的資訊可以在 [認證][1] 和 [存取控制][2] 等章節中獲得。
 
-## Input Sanitization
+## 輸入資料清理
 
-As with any data originating from untrusted sources, the data should be properly sanitized and encoded. For a more detailed coverage of these topics see the [Sanitization][3] and the [Output Encoding][4] parts of this document.
+就像任何從非信任的來源得到的資料一樣，從 websocket 收到的資料也應該被清理和編碼。更多的資訊可以參考 [資料清理][3] 和 [輸出編碼][4] 等章節。
 
 [1]: ../authentication-password-management/README.md
 [2]: ../access-control/README.md
