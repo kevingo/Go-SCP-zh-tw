@@ -1,8 +1,6 @@
 HTTP/TLS
 =========
 
-`TLS/SSL` is a cryptographic protocol that allows encryption over otherwise unsecure communication channels. The most common usage of it is to provide secure `HTTP` communication, also known as `HTTPS`. The protocol ensures that the following properties apply to the communication channel:
-
 `TLS/SSL` 是一個加密的協議，讓雙方的通訊已被加密的狀態進行。最常見的使用情境是使用在 `HTTP` 協議上，也就是 `HTTPS`。`HTTPS` 協議確保以下三項：
 
 * 隱私
