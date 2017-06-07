@@ -3,8 +3,7 @@ Database Connections
 
 ## Keep it closed!
 
-One thing most developers forget is to close the database connection. Let's look
-at this example:
+One thing most developers forget is to close the database connection. Let's look at this example:
 
 ```go
 package main
@@ -22,25 +21,17 @@ func main() {
 }
 ```
 
-As you can see after the opening of the connection, Go shuts down with
-[db.Close()][1]. In this case, we used the driver for MariaDB.
-Note that the `db.Close()` is inside a `defer` statement. In Go this allows
-us to guarantee that the connection is closed.
-More information on defer in the [Error Handling and Logging][2] section.
+As you can see after the opening of the connection, Go shuts down with [db.Close()][1]. In this case, we used the driver for MariaDB. Note that the `db.Close()` is inside a `defer` statement. In Go this allows us to guarantee that the connection is closed. More information on defer in the [Error Handling and Logging][2] section.
 
 You may ask - *why should I close it?*
 
-After closing the SQL connection, it will be returned to the pool. Furthermore,
-since the connections are limited and take resources, if you use the same
-connection string, it's possible to reuse it from the pool.
+After closing the SQL connection, it will be returned to the pool. Furthermore, since the connections are limited and take resources, if you use the same connection string, it's possible to reuse it from the pool.
 
 ## Connection string protection
 
-To keep your connection strings secure, it's always a good practice to put the
-authentication details on a separated configuration file outside public access.
+To keep your connection strings secure, it's always a good practice to put the authentication details on a separated configuration file outside public access.
 
-Instead of placing your configuration file at `/home/public_html/`, consider
-`/home/private/configDB.xml` (should be placed in a protected area)
+Instead of placing your configuration file at `/home/public_html/`, consider `/home/private/configDB.xml` (should be placed in a protected area)
 
 ```xml
 <connectionDB>
@@ -62,8 +53,7 @@ After reading the file, make the database connection:
 db, _ := sql.Open(serverDB, userDB, passDB)
 ```
 
-Of course, if the attacker has root access, he could see the file. Which brings
-us to the most cautious thing you can do - encrypt the file.
+Of course, if the attacker has root access, he could see the file. Which brings us to the most cautious thing you can do - encrypt the file.
 
 ## Database Credentials
 
@@ -74,9 +64,7 @@ You should use different credentials for every trust distinction and level:
 * Guest
 * Admin
 
-That way if a connection is being made for a read-only user, they could never
-mess up with your database information because the user actually can only read
-the data.
+That way if a connection is being made for a read-only user, they could never mess up with your database information because the user actually can only read the data.
 
 [1]: https://golang.org/pkg/database/sql/#DB.Close
 [2]: ../error-handling-logging/README.md
