@@ -103,8 +103,8 @@ Decrypted: Welcome to Go Language Secure Coding Practices
 
 ---
 
-[^1]: Rainbow table attacks are not a weakness on the hashing algorithms.
-[^2]: Consider reading the [Authentication and Password Management][3] section about "_strong one-way salted hashes_" for credentials.
+[^1]: 彩虹表攻擊並不是 hashing 演算法的弱點。
+[^2]: 可以閱讀 [驗證與密碼管理章節][3] 中關於 "_單向的 salted hash 函式_"。
 
 [1]: https://golang.org/pkg/crypto/
 [2]: https://golang.org/pkg/crypto/md5/
