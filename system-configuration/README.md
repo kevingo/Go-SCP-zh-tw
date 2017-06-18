@@ -1,51 +1,41 @@
-System Configuration
+系統設定
 ====================
 
-Keeping things updated is key in security. So, with that in mind, developers
-should keep Go updated to the latest version as well as external packages and
-frameworks used by the web application.
+保持更新到最新版本是資安的關鍵。考慮到這一點，開發者應該將 Go 的版本及外部引用到的套件更新到最新版。
 
-Regarding HTTP requests in Go, you need to know that any incoming server
-requests will be done either in HTTP/1.1 or HTTP/2. If the request is made
-using:
+關於在 Go 中的任何 HTTP 請求，你必須要知道他們會是 HTTP/1.1 或 HTTP/2。即使你指定 HTTP/1.0：
 
 ```go
 req, _ := http.NewRequest("POST", url, buffer)
 req.Proto = "HTTP/1.0"
 ```
 
-[Proto][3] will be ignored and the request will be made using HTTP/1.1.
+[Proto][3] 將會忽略你的設定，還是使用 HTTP/1.1 來進行請求(譯注：可參考原始碼：[https://github.com/golang/go/blob/master/src/net/http/request.go#L117-L124](https://github.com/golang/go/blob/master/src/net/http/request.go#L117-L124))。
 
-## Directory listings
+## 目錄清單瀏覽
 
-If a developer forgets to disable directory listings (OWASP also calls it
-[Directory Indexing][4]), an attacker could check for sensitive files navigating
-through directories.
+當開發者忘記將目錄清單瀏覽的功能關閉時(OWASP 稱之為 [Directory Indexing][4])，攻擊者可以透過瀏覽目錄來取得敏感性的資料。
 
-If you run a Go web server application, you should also be careful with this:
+如果你使用 Go 來建立網頁伺服器時，你需要注意：
 
 ```go
 http.ListenAndServe(":8080", http.FileServer(http.Dir("/tmp/static")))
 ```
 
-If you call `localhost:8080`, it will open your index.html. But imagine you
-have a test directory that has a sensitive file inside?
+如果你呼叫 `localhost:8080`，他會打開 index.html 的檔案，但想像一下如果當中有敏感性的資料會如何？如下所示：
 
 ![password file is shown](files/index_file.png)
 
-Why does this happen?
-Go tries to find an `index.html` inside the directory, and if it
-doesn't exist, it will show the directory listing.
+為什麼會發生這樣的事情？Go 會嘗試在目錄中去找 `index.html`，當檔案不存在時，就會列出整個目錄(譯註：當你的 `/tmp/static` 目錄中不存在 index.html 時，就會列出整個目錄裡面的檔案和資料夾)。
 
-To fix this you have three possible solutions:
+有三個方法可以解決這樣的問題：
 
-* Disable directory listings in your web application
-* Restrict access to unnecessary directories and files
-* Create an index file for each directory
+* 停用目錄清單瀏覽的功能
+* 限制存取的檔案和目錄
+* 每一個目錄都建立一個 index 檔案
 
-For the purpose of this guide, we'll describe a way to disable directory listing.
-First, a function was created that checks the path being requested and if it
-can be shown or not.
+在本章節中，我們會展示如何停用目錄清單的功能。首先，建立一個函式用來檢查請求的路徑是否可以被存取：
+
 
 ```go
 type justFilesFilesystem struct {
@@ -61,77 +51,61 @@ func (fs justFilesFilesystem) Open(name string) (http.File, error) {
 }
 ```
 
-Then we simply use it in our `http.ListenAndServe` as such:
+接著我們可以繼續使用 `http.ListenAndServe`：
 
 ```go
-fs := justFilesFilesystem{http.Dir("tmp/static/")}
+fs := justFilesFilesystem{http.Dir("/tmp/static/")}
 http.ListenAndServe(":8080", http.StripPrefix("/tmp/static", http.FileServer(fs)))
 ```
 
-Note that our application is only allowing the `tmp/static/` path to be
-displayed. When we try to access our protected file directly, we get this:
+現在我們的應用系統只允許顯示 `tmp/static` 的請求路徑，當我們嘗試存取其他路徑時，將會得到以下訊息：
 
 ![password not shown](files/safe.png)
 
-And if we try to list our `test/` folder to get a directory listing, we are
-also shown the same error.
+假設我們嘗試存取 `test/` 目錄時，一樣會得到相同的錯誤：
 
 ![no listing](files/safe2.png)
 
-## Remove/Disable what you don't need
+## 移除/停用你不需要的功能
 
-On production environments, remove all functionalities and files that you don't
-need. Any test code and functions not needed on the final version
-(ready to go to production), should stay on the developer layer and not in a
-location everyone can see - _aka_ public.
+在正式環境中，移除所有你不需要使用到的功能或檔案。任何測試程式碼或函式都不應該存在於即將部署到正式環境的程式碼中。
 
-HTTP Response Headers should also be checked. Removing the headers which
-disclose sensitive information like:
+HTTP 回應的 header 也應該要被檢查。移除任何會揭露敏感資訊的 header 欄位，例如：
 
-* OS version
-* Webserver version
-* Framework or programming language version
+* 作業系統版本
+* 網站伺服器版本
+* 使用的程式語言框架或版本
 
 ![Example of version disclosure on HTTP headers](files/headers_set_versions.jpg)
 
-This information can be used by attackers to check for vulnerabilities in the
-versions you disclose, therefore, it is advised to remove them.
+攻擊者可以從這些資訊找出對應版本所揭露的漏洞，因此，最好的方式就是移除這些敏感資訊。
 
-By default, this is not disclosed by Go. However, if you use any type of external
-package or framework, don't forget to double-check it.
+在預設的情況下，Go 不會揭露這些敏感資訊，然而，如果你使用外部套件，別忘了再確認一下。
 
-Try to find something like:
+試著找看看類似以下的資訊：
 
 ```go
 w.Header().Set("X-Request-With", "Go Vulnerable Framework 1.2")
 ```
 
-You can search the code for the HTTP header that is being disclosed and
-remove it.
+你可以搜尋程式碼中是否有類似的 HTTP header，將他們移除。
 
-Also you can define which HTTP methods the web application will support.
-If you only use/accept POST and GET, you can implement CORS and use the
-following code:
+同樣的，你可以定義你的網頁伺服器只支援特定的 HTTP 方法，例如，你只打算支援 POST 和 GET，就可以定義：
 
 ```go
 w.Header().Set("Access-Control-Allow-Methods", "POST, GET")
 ```
 
-Don't worry about disabling things like WebDAV because if you want to implement
-a WebDAV server you need to [import a package][2].
+不要擔心停用像是 WebDAV這樣的功能，因為如果你要提供一個 WebDAV 的伺服器時，你需要引用[特定的套件][2]
 
-## Implement better security
+## 實作更好的安全機制
 
-Put your mindset hat on and follow the [least privilege principle][1] on the web
-server, processes and service accounts.
+將你的心態放在遵循伺服器、流程和帳號的[最低權限原則][1]。
 
-Take care of your web application error handling. When exceptions occur, fail
-securely. You can check [Error Handling and Logging][5] section in this guide
-for more information regarding this topic.
+注意網頁伺服器的錯誤處理部分，當發生錯誤例外時，讓他們安全的被處理。請參考本書的[錯誤處理與日誌][5]章節。
 
-Prevent disclosure of the directory structure on your `robots.txt` file.
-`robots.txt` is a direction file and __NOT__ a security control.
-Adopt a white-list approach:
+防止你的 `robots.txt` 檔案中的目錄結構被洩漏。`robots.txt` 是一個目標文件，並不是用來做安全控制的。你可以在 `robots.txt` 檔案中採取白名單模式：
+
 
 ```
 User-agent: *
@@ -142,49 +116,34 @@ Allow: /aboutus
 Disallow: /
 ```
 
-The example above will allow any user-agent or bot to index those specific
-pages and disallow the rest. This way you don't disclose sensitive folders or
-pages - like admin paths or other important data.
+上面的範例中允許任何 user-agent 或是爬蟲機器人來索引任何特定的頁面，但是其他的則拒絕。這樣的話你可以不洩漏一些帶有敏感性資料的頁面，比如說：管理者頁面或呈現重要資料的頁面。
 
-Isolate the development environment from the production network. Provide the
-right access to developers and test groups, and better yet, create additional
-security layers to protect them. In most cases, development environments are
-easier targets to attacks.
+將你的開發環境和正式環境的網路進行隔離。提供正確的存取權限給開發者和測試者，並且建立更好的安全層來保護他們。一般來說，開發環境會比正式環境來得容易被攻擊。
 
-Lastly, but still very important, is to have a software change control system to
-manage and record changes in your web application code (development and
-production environments). There are numerous Github host-yourself clones that
-can be used for this purpose.
+最後一個重要的事情是記得要使用版本管理系統來記錄所有開發和正式環境的程式碼變更。Github，或是其他類似的版本管理系統可以達到這樣的目的。
 
-## Asset Management System:
+## 資產管理系統:
 
-Although an `Asset Management System` is not a Go specific issue, a short
-overview of the concept and its practices are described in the following
-section.
+儘管 `資產管理系統` 並非 Go 語言特定的問題，但我們會在下方提及它簡短的概念。
 
-`Asset Management` encompasses the set of activities  that an organization
-performs in order to achieve the optimum performance of their assets in line
-with its objectives, as well as the evaluation of the required level of security
-of each asset.
-It should be noted that in this section, when we refer to _Assets_ we are not
-only talking about the system's components but also it's software.
+`資產管理` 包括了組織為了達到其資產最佳化而進行的一系列活動，同時包含了每個資產所需要的安全水準。應該注意的是，在本章節中所提到的資產，並不僅僅是系統中的元件，而是包含了整個軟體部分。
 
-The steps involved in the implementation of this system are as follows:
+要實現這樣的系統會包含以下幾個步驟：
 
-1. Establish the importance of information security in business.
-2. Define the scope for AMS.
-3. Define the security policy.
-4. Establish the security organization structure.
-5. Identify and classify the assets.
-6. Identify and assess the risks
-7. Plan for risk management.
-8. Implement risk mitigation strategy.
-9. Write the statement of applicability.
-10. Train the staff and create security awareness.
-11. Monitor and review the AMS performance.
-12. Maintain the AMS and ensure continual improvement.
+1. 在企業中建立資訊安全的重要性。
+2. 定義 AMS 的範圍。
+3. 定義資訊安全策略。
+4. 定義資訊安全的組織架構。
+5. 針對資產定型定義與分類。
+6. 確定和評估資產的風險。
+7. 規劃風險管理。
+8. 實施風險緩解策略。
+9. 撰寫適用性聲明。
+10. 訓練員工建立安全意識。
+11. 監控並檢視 AMS 的成效。
+12. 維護 AMS，並確保其持續改善。
 
-A more in-depth analysis of this implementation can be found [here][5].
+更深入的分析與實作可以參考[這一篇文章][5]。
 
 [1]: https://www.owasp.org/index.php/Least_privilege
 [2]: https://godoc.org/golang.org/x/net/webdav
