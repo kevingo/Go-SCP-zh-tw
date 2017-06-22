@@ -1,22 +1,23 @@
-Database Authentication
+資料庫驗證
 =======================
 
-## Access the database with minimal privilege
+## 使用最小權限來存取資料庫
 
-If your Go web application only needs to read data and doesn't need to write information, create a database user whose permissions are `read-only`. Always adjust the database user according to your web applications needs.
+如果你的應用程式只需要讀取資料，而不需要寫資料到資料庫，那就建立一個「唯讀」的資料庫使用者來使用。永遠記得根據應用程式的需求來調整資料庫帳號的權限。
 
-## Use a strong password
+## 使用夠強健的密碼
 
-When creating your database access, choose a strong password. You can use password managers to generate a strong password or use online web applications that do the same for you - [Strong Password Generator][1].
+當建立資料庫連線時，使用強度足夠的密碼。你可以使用一些工具來產生足夠安全的密碼，或是使用類似 [Strong Password Generator][1] 這一類的線上服務來產生。
 
-## Remove default admin passwords
 
-Most DBS have default accounts and most of them have no passwords on their highest privilege user.
+## 移除預設的管理者密碼
 
-MariaDB, MongoDB - root/no password
+大多數的資料庫系統都有預設的帳號，而且預設的管理者帳號都沒有密碼。
 
-Which means that if there is no password, the attacker could gain access to everything.
+MariaDB, MongoDB - 像這些管理者帳號都沒有預設密碼。
 
-Also, don't forget to remove your credentials and/or private key(s) if you're going to post your code on a publicly accessible repository in Github.
+這代表當你沒有指定管理者密碼時，攻擊者很容易進行攻擊。
+
+另外，如果你的專案會放到公開的版本控制系統上 (例如：Github) 時，別忘記移除你的憑證或私鑰。
 
 [1]: https://strongpasswordgenerator.com/
