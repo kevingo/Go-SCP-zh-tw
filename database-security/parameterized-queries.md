@@ -1,32 +1,32 @@
-Parameterized Queries
+參數化查詢
 =====================
 
-Prepared Statements (with Parameterized Queries) are the best and most secure way to protect against SQL Injections.
+Prepared Statements (加上參數化查詢) 是防止 SQL injection 攻擊最好也最安全的方法。
 
-In some reported situations, prepared statements could harm performance of the web application. Therefore, if for any reason you need to stop using this type of database queries, we strongly suggest to read [Input Validation][1] and [Output Encoding][2] sections.
+在某些報告中，你可能會閱讀到 prepared statements 可能會降低應用程式的性能，因此如果你想要停用 prepared statements 時，我們強烈建議你閱讀 [輸入驗證][1] 和 [輸出編碼][2] 等章節。
 
-Go works differently from usual prepared statements on other languages - you don't prepare a statement on a connection. You prepare it on the DB.
+Go 和其他語言在使用 prepared statmenets 的方法不同：你不是使用在資料庫連線上，而是使用在資料庫端。
 
-## Flow
+## 流程
 
-1. The developer prepares the statement (`Stmt`) on a connection in the pool
-2. The `Stmt` object remembers which connection was used
-3. When the application executes the `Stmt`, it tries to use that connection. If it's not available it will try to find another connection in the pool
+1. 開發者在 statement(`stmt`) 從連接池中準備連線。
+2. `Stmt` 會記住現在使用哪個連線。
+3. 當應用程式使用 `stmt` 物件時，它會嘗試使用該連線。如果該連線無法使用，則嘗試從連接池中尋找另外一個連線。
 
-This type of flow could cause high-concurrency usage of the database and creates lots of prepared statements. So, it's important to keep this information in mind.
+這可能會造成資料庫有過多的連線，並且創造太多的 prepared statements，所以要記得這個重要的流程。
 
-Here's an example of a prepared statement with parameterized queries:
+底下是一個 prepared statement 加上參數化查詢的範例：
 
 ```go
 customerName := r.URL.Query().Get("name")
 db.Exec("UPDATE creditcards SET name=? WHERE customerId=?", customerName, 233, 90)
 ```
 
-Sometimes a prepared statement is not what you want. There might be several reasons for this:
+某些時候，prepared statements 可能不是你想要的，原因有以下兩點：
 
-* The database doesn’t support prepared statements. When using the MySQL driver, for example, you can connect to MemSQL and Sphinx, because they support the MySQL wire protocol. But they don’t support the "binary" protocol that includes prepared statements, so they can fail in confusing ways.
+* 資料庫不支援 prepared statement。比如說，當你使用 MySQL 的驅動程式時，你可以連線到 MemSQL 和 Sphinx，因為他們兩個資料庫也支援 MySQL 的通訊協定。但他們並不支援 "binary" 的通訊協定，包含了 prepared statement。
 
-* The statements aren’t reused enough to make them worthwhile, and security issues are handled in another layer of our application stack (See: [Input Validation][1] and [Output Encoding][2]), so performance as seen above is undesired.
+* 這些 statements 不會重用，導致使用他們並不划算。同時，你可以會把安全考量在其他的面向處理掉(你可以閱讀：[輸入驗證][1] 和 [輸出編碼][2] 等章節)。
 
 [1]: /input-validation/README.md
 [2]: /output-encodeing/README.md
